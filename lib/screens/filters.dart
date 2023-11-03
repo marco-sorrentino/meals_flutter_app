@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meals_flutter_app/providers/filters_provider.dart';
 
-enum Filter { glutenFree, lactofree, vegetarianFree, veganFree }
-
-class FilterScreen extends StatefulWidget {
-  const FilterScreen({super.key, required this.currentFilters});
-
-  final Map<Filter, bool> currentFilters;
+class FilterScreen extends ConsumerStatefulWidget {
+  const FilterScreen({super.key});
 
   @override
-  State<FilterScreen> createState() {
+  ConsumerState<FilterScreen> createState() {
     return _FilterScreenState();
   }
 }
 
-class _FilterScreenState extends State<FilterScreen> {
+class _FilterScreenState extends ConsumerState<FilterScreen> {
   var _glutenFreeFilterSet = false;
   var _lactoseFreeFilterSet = false;
   var _vegetarianFreeFilterSet = false;
@@ -22,10 +20,11 @@ class _FilterScreenState extends State<FilterScreen> {
   @override
   void initState() {
     super.initState();
-    _glutenFreeFilterSet = widget.currentFilters[Filter.glutenFree]!;
-    _lactoseFreeFilterSet = widget.currentFilters[Filter.lactofree]!;
-    _veganFreeFilterSet = widget.currentFilters[Filter.veganFree]!;
-    _vegetarianFreeFilterSet = widget.currentFilters[Filter.vegetarianFree]!;
+    final activeFilters = ref.read(filterProvider);
+    _glutenFreeFilterSet = activeFilters[Filter.glutenFree]!;
+    _lactoseFreeFilterSet = activeFilters[Filter.lactofree]!;
+    _veganFreeFilterSet = activeFilters[Filter.veganFree]!;
+    _vegetarianFreeFilterSet = activeFilters[Filter.vegetarianFree]!;
   }
 
   @override
@@ -48,15 +47,14 @@ class _FilterScreenState extends State<FilterScreen> {
       ), */
       body: WillPopScope(
         onWillPop: () async {
-          Navigator.of(context).pop(
-            {
-              Filter.glutenFree: _glutenFreeFilterSet,
-              Filter.lactofree: _lactoseFreeFilterSet,
-              Filter.vegetarianFree: _vegetarianFreeFilterSet,
-              Filter.veganFree: _veganFreeFilterSet,
-            },
-          );
-          return false;
+          ref.read(filterProvider.notifier).setFilter({
+            Filter.glutenFree: _glutenFreeFilterSet,
+            Filter.lactofree: _lactoseFreeFilterSet,
+            Filter.vegetarianFree: _vegetarianFreeFilterSet,
+            Filter.veganFree: _veganFreeFilterSet,
+          });
+          // Navigator.of(context).pop();
+          return true;
         },
         child: Column(
           children: [
